@@ -22,7 +22,7 @@
 -export([to_html/2, to_json/2, to_text/2]).
 
 -include_lib("dns/include/dns.hrl").
--include("erldns.hrl").
+-include_lib("erldns/include/erldns.hrl").
 
 init(_Transport, _Req, []) ->
   {upgrade, protocol, cowboy_rest}.
