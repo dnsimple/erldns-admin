@@ -41,7 +41,9 @@ is_authorized(Req, State) ->
 resource_exists(Req, State) ->
   {Name, _} = cowboy_req:binding(name, Req),
   lager:debug("Checking if ~p exists in zone cache", [Name]),
-  {erldns_zone_cache:in_zone(Name), Req, State}.
+  InCache = erldns_zone_cache:in_zone(Name),
+  lager:debug("Zone in cache? ~p", [InCache]),
+  {InCache, Req, State}.
 
 to_html(Req, State) ->
   {<<"erldns admin">>, Req, State}.
@@ -50,6 +52,7 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
+  lager:debug("Received request: ~p", [Req]),
   case cowboy_req:get(method, Req) of
     <<"GET">> ->
       {Name, _} = cowboy_req:binding(name, Req),
