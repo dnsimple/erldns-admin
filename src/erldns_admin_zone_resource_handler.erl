@@ -16,7 +16,7 @@
 -module(erldns_admin_zone_resource_handler).
 
 -export([init/3]).
--export([content_types_provided/2, is_authorized/2, resource_exists/2, allowed_methods/2]).
+-export([content_types_provided/2, is_authorized/2, resource_exists/2, allowed_methods/2, delete_resource/2]).
 -export([to_html/2, to_json/2, to_text/2]).
 
 -include_lib("dns/include/dns.hrl").
@@ -26,7 +26,7 @@ init(_Transport, _Req, []) ->
   {upgrade, protocol, cowboy_rest}.
 
 allowed_methods(Req, State) ->
-  {[<<"GET">>, <<"HEAD">>, <<"OPTIONS">>, <<"DELETE">>], Req, State}.
+  {[<<"GET">>, <<"DELETE">>], Req, State}.
 
 content_types_provided(Req, State) ->
   {[
@@ -45,6 +45,13 @@ resource_exists(Req, State) ->
   lager:debug("Zone in cache? ~p", [InCache]),
   {InCache, Req, State}.
 
+delete_resource(Req, State) ->
+  {Name, _} = cowboy_req:binding(name, Req),
+  lager:debug("Received DELETE for ~p", [Name]),
+  erldns_zone_cache:delete_zone(Name),
+  {true, Req, State}.
+
+
 to_html(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
@@ -52,25 +59,13 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  lager:debug("Received request: ~p", [Req]),
-  case cowboy_req:get(method, Req) of
-    <<"GET">> ->
-      {Name, _} = cowboy_req:binding(name, Req),
-      lager:debug("Received GET for ~p", [Name]),
-      case erldns_zone_cache:get_zone_with_records(Name) of
-        {ok, Zone} ->
-          {erldns_zone_encoder:zone_to_json(Zone), Req, State};
-        {error, Reason} ->
-          lager:error("Error getting zone: ~p", [Reason]),
-          {ok, Req2} = cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req),
-          {halt, Req2, State}
-      end;
-    <<"DELETE">> ->
-      {Name, _} = cowboy_req:binding(name, Req),
-      lager:debug("Received DELETE for ~p", [Name]),
-      erldns_zone_cache:delete_zone(Name),
-      {<<"">>, Req, State};
-    Method ->
-      lager:debug("Received unsupported method: ~p", [Method])
+  {Name, _} = cowboy_req:binding(name, Req),
+  lager:debug("Received GET for ~p", [Name]),
+  case erldns_zone_cache:get_zone_with_records(Name) of
+    {ok, Zone} ->
+      {erldns_zone_encoder:zone_to_json(Zone), Req, State};
+    {error, Reason} ->
+      lager:error("Error getting zone: ~p", [Reason]),
+      {ok, Req2} = cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req),
+      {halt, Req2, State}
   end.
-
