@@ -13,7 +13,7 @@
 %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 %% @doc Cowbow handler that handles Admin API requests to /zones/:name
--module(erldns_admin_zone_query_handler).
+-module(erldns_admin_zone_resource_handler).
 
 -export([init/3]).
 -export([content_types_provided/2, is_authorized/2, resource_exists/2]).
