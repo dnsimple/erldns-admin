@@ -40,6 +40,7 @@ is_authorized(Req, State) ->
 
 resource_exists(Req, State) ->
   {Name, _} = cowboy_req:binding(name, Req),
+  lager:debug("Checking if ~p exists in zone cache", [Name]),
   {erldns_zone_cache:in_zone(Name), Req, State}.
 
 to_html(Req, State) ->
@@ -65,6 +66,8 @@ to_json(Req, State) ->
       {Name, _} = cowboy_req:binding(name, Req),
       lager:debug("Received DELETE for ~p", [Name]),
       erldns_zone_cache:delete_zone(Name),
-      {<<"{}">>, Req, State}
+      {<<"">>, Req, State};
+    Method ->
+      lager:debug("Received unsupported method: ~p", [Method])
   end.
 
