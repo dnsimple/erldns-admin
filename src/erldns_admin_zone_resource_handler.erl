@@ -52,6 +52,7 @@ to_json(Req, State) ->
   case cowboy_req:get(method, Req) of
     <<"GET">> ->
       {Name, _} = cowboy_req:binding(name, Req),
+      lager:debug("Received GET for %s", [Name]),
       case erldns_zone_cache:get_zone_with_records(Name) of
         {ok, Zone} ->
           {erldns_zone_encoder:zone_to_json(Zone), Req, State};
