@@ -40,10 +40,7 @@ is_authorized(Req, State) ->
 
 resource_exists(Req, State) ->
   {Name, _} = cowboy_req:binding(name, Req),
-  lager:debug("Checking if ~p exists in zone cache", [Name]),
-  InCache = erldns_zone_cache:in_zone(Name),
-  lager:debug("Zone in cache? ~p", [InCache]),
-  {InCache, Req, State}.
+  {erldns_zone_cache:in_zone(Name), Req, State}.
 
 delete_resource(Req, State) ->
   {Name, _} = cowboy_req:binding(name, Req),
