@@ -7,4 +7,3 @@ build:
 clean:
 	rm -Rf deps
 	./rebar clean
-

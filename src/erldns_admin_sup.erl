@@ -12,8 +12,7 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-%% @doc Application supervisor. Supervises everything except the UDP and TCP
-%% listeners and the zone checker.
+%% @doc Application supervisor.
 -module(erldns_admin_sup).
 -behavior(supervisor).
 

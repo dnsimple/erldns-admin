@@ -57,8 +57,6 @@ to_json(Req, State) ->
           {jsx:encode([]), Req, State}
       end;
     _ ->
-      lager:debug("Unsupported action: ~p", [Name]),
+      lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
       {jsx:encode([]), Req, State}
   end.
-  
-
