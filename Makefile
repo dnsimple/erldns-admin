@@ -5,5 +5,10 @@ build:
 	./rebar compile
 
 clean:
+	./rebar clean
+
+wipe:
 	rm -Rf deps
 	./rebar clean
+
+fresh: wipe build
