@@ -1,14 +1,14 @@
 all: clean build
 
 build:	
-	./rebar get-deps
-	./rebar compile
+	./rebar3 get-deps
+	./rebar3 compile
 
 clean:
-	./rebar clean
+	./rebar3 clean
 
 wipe:
 	rm -Rf deps
-	./rebar clean
+	./rebar3 clean
 
 fresh: wipe build
