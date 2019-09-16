@@ -19,7 +19,7 @@
 -export([content_types_provided/2, is_authorized/2, resource_exists/2, allowed_methods/2, delete_resource/2]).
 -export([to_html/2, to_json/2, to_text/2]).
 
--include_lib("dns/include/dns.hrl").
+-include_lib("dns_erlang/include/dns.hrl").
 -include_lib("erldns/include/erldns.hrl").
 
 init(_Transport, _Req, []) ->

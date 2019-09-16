@@ -1,14 +1,19 @@
+REBAR:=$(shell which rebar3 || echo ./rebar3)
+REBAR_URL:="https://s3.amazonaws.com/rebar3/rebar3"
+
 all: clean build
 
-build:	
-	./rebar3 get-deps
-	./rebar3 compile
+$(REBAR):
+	wget $(REBAR_URL) && chmod +x rebar3
 
-clean:
-	./rebar3 clean
+build: $(REBAR)
+	$(REBAR) compile
 
-wipe:
+clean: $(REBAR)
+	$(REBAR) clean
+
+wipe: $(REBAR)
 	rm -Rf deps
-	./rebar3 clean
+	$(REBAR) clean
 
 fresh: wipe build
