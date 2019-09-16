@@ -41,11 +41,11 @@ is_authorized(Req, State) ->
   erldns_admin:is_authorized(Req, State).
 
 resource_exists(Req, State) ->
-  {Name, _} = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(name, Req),
   {erldns_zone_cache:in_zone(Name), Req, State}.
 
 delete_resource(Req, State) ->
-  {Name, _} = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(name, Req),
   lager:debug("Received DELETE for ~p", [Name]),
   erldns_zone_cache:delete_zone(Name),
   {true, Req, State}.
@@ -58,13 +58,12 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  {Name, _} = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(name, Req),
   lager:debug("Received GET for ~p", [Name]),
   case erldns_zone_cache:get_zone_with_records(Name) of
     {ok, Zone} ->
       {erldns_zone_encoder:zone_to_json(Zone), Req, State};
     {error, Reason} ->
       lager:error("Error getting zone: ~p", [Reason]),
-      {ok, Req2} = cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req),
-      {halt, Req2, State}
+      {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
   end.
