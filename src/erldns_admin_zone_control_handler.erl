@@ -46,8 +46,8 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  {Name, _} = cowboy_req:binding(name, Req),
-  {Action, _} = cowboy_req:binding(action, Req),
+  Name = cowboy_req:binding(name, Req),
+  Action = cowboy_req:binding(action, Req),
   case Action of
     <<"reload">> ->
       lager:debug("Reloading ~p", [Name]),
