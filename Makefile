@@ -13,7 +13,7 @@ clean: $(REBAR)
 	$(REBAR) clean
 
 wipe: $(REBAR)
-	rm -Rf deps
+	rm -Rf _build
 	$(REBAR) clean
 
 fresh: wipe build
