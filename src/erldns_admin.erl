@@ -41,12 +41,11 @@
 is_authorized(Req, State) ->
   case credentials() of
     {Username, Password} ->
-      {ok, Auth, Req1} = cowboy_req:parse_header(<<"authorization">>, Req),
-      case Auth of
-        {<<"basic">>, {User = Username, Password}} ->
-          {true, Req1, User};
+      case cowboy_req:parse_header(<<"authorization">>, Req) of
+        {basic, Username, Password} ->
+          {true, Req, Username};
         _ ->
-          {{false, <<"Basic realm=\"erldns admin\"">>}, Req1, State}
+          {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
       end;
     _ -> {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
   end.
