@@ -14,7 +14,7 @@
 
 %% @doc Cowboy handler that handles Admin API requests to /zones/:name/:action
 %%
-%% Currently only the "reload" action is supported.
+%% Currently no actions are supported.
 -module(erldns_admin_zone_control_handler).
 
 -export([init/2]).
@@ -49,15 +49,6 @@ to_json(Req, State) ->
   Name = cowboy_req:binding(name, Req),
   Action = cowboy_req:binding(action, Req),
   case Action of
-    <<"reload">> ->
-      lager:debug("Reloading ~p", [Name]),
-      case erldns_zone_client:fetch_zone(Name) of
-        Zone when is_record(Zone, zone) ->
-          {erldns_zone_encoder:zone_to_json(Zone), Req, State};
-        Result ->
-          lager:debug("Fetch zone result: ~p", [Result]),
-          {jsx:encode([]), Req, State}
-      end;
     _ ->
       lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
       {jsx:encode([]), Req, State}
