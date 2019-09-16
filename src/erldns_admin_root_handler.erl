@@ -15,12 +15,14 @@
 %% @doc Cowboy handler that handles Admin API requests to /
 -module(erldns_admin_root_handler).
 
--export([init/3]).
+-export([init/2]).
 -export([content_types_provided/2, is_authorized/2]).
 -export([to_html/2, to_json/2, to_text/2]).
 
-init(_Transport, _Req, []) ->
-  {upgrade, protocol, cowboy_rest}.
+-behaviour(cowboy_rest).
+
+init(Req, State) ->
+  {cowboy_rest, Req, State}.
 
 content_types_provided(Req, State) ->
   {[
