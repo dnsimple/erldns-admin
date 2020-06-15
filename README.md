@@ -6,19 +6,21 @@ This app provides an admin API for querying and controlling an erldns server.
 
 To build:
 
-```
+```bash
 make
 ```
 
 To start fresh:
 
-```
+```bash
 make fresh
 make
 ```
 
 ## Running
 
-```sh
-overmind start
+### To get an interactive Erlang REPL:
+
+```bash
+./rebar3 shell
 ```
