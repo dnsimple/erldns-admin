@@ -14,13 +14,4 @@ To start fresh:
 
 ```bash
 make fresh
-make
-```
-
-## Running
-
-### To get an interactive Erlang REPL:
-
-```bash
-./rebar3 shell
 ```
