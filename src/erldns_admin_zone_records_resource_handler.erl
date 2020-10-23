@@ -60,9 +60,7 @@ to_json(Req, State) ->
 
   case lists:keyfind(<<"type">>, 1, Params) of
     false ->
-      Records = erldns_zone_cache:get_zone_records_by_name(ZoneName, RecordName),
-      {erldns_zone_encoder:records_to_json(Records), Req, State};
+      {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
     {<<"type">>, RecordType} ->
-      Records = erldns_zone_cache:get_zone_records_by_name_and_type(ZoneName, RecordName, RecordType),
-      {erldns_zone_encoder:records_to_json(Records), Req, State}
+      {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
   end.
