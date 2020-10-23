@@ -59,11 +59,24 @@ to_text(Req, State) ->
 
 to_json(Req, State) ->
   Name = cowboy_req:binding(name, Req),
-  lager:debug("Received GET for ~p", [Name]),
-  case erldns_zone_cache:get_zone_with_records(Name) of
-    {ok, Zone} ->
-      {erldns_zone_encoder:zone_to_json(Zone), Req, State};
-    {error, Reason} ->
-      lager:error("Error getting zone: ~p", [Reason]),
-      {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+  Params = cowboy_req:parse_qs(Req),
+  lager:debug("Received GET for ~p (params: ~p)", [Name, Params]),
+
+  case lists:keyfind(<<"metaonly">>, 1, Params) of
+    false ->
+      case erldns_zone_cache:get_zone_with_records(Name) of
+        {ok, Zone} ->
+          {erldns_zone_encoder:zone_to_json(Zone), Req, State};
+        {error, Reason} ->
+          lager:error("Error getting zone: ~p", [Reason]),
+          {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+      end;
+    _ ->
+      case erldns_zone_cache:get_zone(Name) of
+        {ok, Zone} ->
+          {erldns_zone_encoder:zone_meta_to_json(Zone), Req, State};
+        {error, Reason} ->
+          lager:error("Error getting zone: ~p", [Reason]),
+          {halt, cowbow_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+      end
   end.
