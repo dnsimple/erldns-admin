@@ -41,11 +41,11 @@ is_authorized(Req, State) ->
   erldns_admin:is_authorized(Req, State).
 
 resource_exists(Req, State) ->
-  Name = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(zone_name, Req),
   {erldns_zone_cache:in_zone(Name), Req, State}.
 
 delete_resource(Req, State) ->
-  Name = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(zone_name, Req),
   lager:debug("Received DELETE for ~p", [Name]),
   erldns_zone_cache:delete_zone(Name),
   {true, Req, State}.
