@@ -58,7 +58,7 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  Name = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(zone_name, Req),
   Params = cowboy_req:parse_qs(Req),
   lager:debug("Received GET for ~p (params: ~p)", [Name, Params]),
 
