@@ -53,14 +53,16 @@ to_text(Req, State) ->
 
 to_json(Req, State) ->
   ZoneName = cowboy_req:binding(zone_name, Req),
-  RecordName = cowboy_req:binding(record_name, Req),
+  RecordName = cowboy_req:binding(record_name, Req, <<"">>),
   Params = cowboy_req:parse_qs(Req),
 
   lager:debug("Received GET (zone_name: ~p, record_name: ~p)", [ZoneName, RecordName]),
 
   case lists:keyfind(<<"type">>, 1, Params) of
     false ->
+      lager:debug("Type is not specified"),
       {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
     {<<"type">>, RecordType} ->
+      lager:debug("Type is specified (type: ~p)", [RecordType]),
       {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
   end.

@@ -63,6 +63,7 @@ init([]) ->
         [
           {"/", erldns_admin_root_handler, []},
           {"/zones/:name", erldns_admin_zone_resource_handler, []},
+          {"/zones/:zone_name/records", erldns_admin_zone_records_resource_handler, []},
           {"/zones/:zone_name/records/:record_name", erldns_admin_zone_records_resource_handler, []},
           {"/zones/:name/:action", erldns_admin_zone_control_handler, []}
         ]
