@@ -46,7 +46,7 @@ to_text(Req, State) ->
   {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  Name = cowboy_req:binding(name, Req),
+  Name = cowboy_req:binding(zone_name, Req),
   Action = cowboy_req:binding(action, Req),
   case Action of
     _ ->
