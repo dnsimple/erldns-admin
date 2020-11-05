@@ -64,7 +64,7 @@ to_json(Req, State) ->
 
   case lists:keyfind(<<"metaonly">>, 1, Params) of
     false ->
-      case erldns_zone_cache:get_zone_with_records(Name) of
+      case erldns_zone_cache:get_zone(Name) of
         {ok, Zone} ->
           {erldns_zone_encoder:zone_to_json(Zone), Req, State};
         {error, Reason} ->
