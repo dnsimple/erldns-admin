@@ -6,14 +6,18 @@ all: clean build
 $(REBAR):
 	wget $(REBAR_URL) && chmod +x rebar3
 
+.PHONY: build
 build: $(REBAR)
 	$(REBAR) compile
 
+.PHONY: clean
 clean: $(REBAR)
 	$(REBAR) clean
 
+.PHONY: wipe
 wipe: $(REBAR)
 	rm -Rf _build
 	$(REBAR) clean
 
+.PHONY: fresh
 fresh: wipe build
