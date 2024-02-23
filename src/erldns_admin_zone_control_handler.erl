@@ -27,29 +27,33 @@
 -include_lib("erldns/include/erldns.hrl").
 
 init(Req, State) ->
-  {cowboy_rest, Req, State}.
+    {cowboy_rest, Req, State}.
 
 content_types_provided(Req, State) ->
-  {[
-      {<<"text/html">>, to_html},
-      {<<"text/plain">>, to_text},
-      {<<"application/json">>, to_json}
-    ], Req, State}.
+    {
+        [
+            {<<"text/html">>, to_html},
+            {<<"text/plain">>, to_text},
+            {<<"application/json">>, to_json}
+        ],
+        Req,
+        State
+    }.
 
 is_authorized(Req, State) ->
-  erldns_admin:is_authorized(Req, State).
+    erldns_admin:is_authorized(Req, State).
 
 to_html(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_text(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  Name = cowboy_req:binding(zone_name, Req),
-  Action = cowboy_req:binding(action, Req),
-  case Action of
-    _ ->
-      lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
-      {jsx:encode([]), Req, State}
-  end.
+    Name = cowboy_req:binding(zone_name, Req),
+    Action = cowboy_req:binding(action, Req),
+    case Action of
+        _ ->
+            lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
+            {jsx:encode([]), Req, State}
+    end.

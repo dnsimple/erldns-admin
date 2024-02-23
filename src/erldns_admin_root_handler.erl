@@ -22,37 +22,42 @@
 -behaviour(cowboy_rest).
 
 init(Req, State) ->
-  {cowboy_rest, Req, State}.
+    {cowboy_rest, Req, State}.
 
 content_types_provided(Req, State) ->
-  {[
-      {<<"text/html">>, to_html},
-      {<<"text/plain">>, to_text},
-      {<<"application/json">>, to_json}
-    ], Req, State}.
+    {
+        [
+            {<<"text/html">>, to_html},
+            {<<"text/plain">>, to_text},
+            {<<"application/json">>, to_json}
+        ],
+        Req,
+        State
+    }.
 
 is_authorized(Req, State) ->
-  erldns_admin:is_authorized(Req, State).
+    erldns_admin:is_authorized(Req, State).
 
 to_html(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_text(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  ZoneNamesAndVersionsForJson = lists:map(
-    fun({Name, Version}) -> 
-        [{<<"name">>, Name}, {<<"version">>, Version}]
-    end, erldns_zone_cache:zone_names_and_versions()),
+    ZoneNamesAndVersionsForJson = lists:map(
+        fun({Name, Version}) ->
+            [{<<"name">>, Name}, {<<"version">>, Version}]
+        end,
+        erldns_zone_cache:zone_names_and_versions()
+    ),
 
-  Body = jsx:encode([{<<"erldns">>, 
-        [
-          {<<"zones">>, [
-              {<<"count">>, length(ZoneNamesAndVersionsForJson)},
-              {<<"versions">>, ZoneNamesAndVersionsForJson} 
+    Body = jsx:encode([
+        {<<"erldns">>, [
+            {<<"zones">>, [
+                {<<"count">>, length(ZoneNamesAndVersionsForJson)},
+                {<<"versions">>, ZoneNamesAndVersionsForJson}
             ]}
-        ]
-      }]),
-  {Body, Req, State}.
-
+        ]}
+    ]),
+    {Body, Req, State}.
