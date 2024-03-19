@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2020, DNSimple Corporation 
+%% Copyright (c) 2012-2020, DNSimple Corporation
 %%
 %% Permission to use, copy, modify, and/or distribute this software for any
 %% purpose with or without fee is hereby granted, provided that the above
@@ -25,43 +25,45 @@
 -include_lib("erldns/include/erldns.hrl").
 
 init(Req, State) ->
-  {cowboy_rest, Req, State}.
+    {cowboy_rest, Req, State}.
 
 allowed_methods(Req, State) ->
-  {[<<"GET">>], Req, State}.
+    {[<<"GET">>], Req, State}.
 
 content_types_provided(Req, State) ->
-  {[
-      {<<"text/html">>, to_html},
-      {<<"text/plain">>, to_text},
-      {<<"application/json">>, to_json}
-    ], Req, State}.
+    {
+        [
+            {<<"text/html">>, to_html},
+            {<<"text/plain">>, to_text},
+            {<<"application/json">>, to_json}
+        ],
+        Req,
+        State
+    }.
 
 is_authorized(Req, State) ->
-  erldns_admin:is_authorized(Req, State).
+    erldns_admin:is_authorized(Req, State).
 
 resource_exists(Req, State) ->
-  Name = cowboy_req:binding(zone_name, Req),
-  {erldns_zone_cache:in_zone(Name), Req, State}.
-
+    Name = cowboy_req:binding(zone_name, Req),
+    {erldns_zone_cache:in_zone(Name), Req, State}.
 
 to_html(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_text(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  ZoneName = cowboy_req:binding(zone_name, Req),
-  RecordName = cowboy_req:binding(record_name, Req, <<"">>),
-  Params = cowboy_req:parse_qs(Req),
+    ZoneName = cowboy_req:binding(zone_name, Req),
+    RecordName = cowboy_req:binding(record_name, Req, <<"">>),
+    Params = cowboy_req:parse_qs(Req),
 
-
-  case lists:keyfind(<<"type">>, 1, Params) of
-    false ->
-      lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: unspecified)", [ZoneName, RecordName]),
-      {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
-    {<<"type">>, RecordType} ->
-      lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: ~p)", [ZoneName, RecordName, RecordType]),
-      {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
-  end.
+    case lists:keyfind(<<"type">>, 1, Params) of
+        false ->
+            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: unspecified)", [ZoneName, RecordName]),
+            {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
+        {<<"type">>, RecordType} ->
+            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: ~p)", [ZoneName, RecordName, RecordType]),
+            {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
+    end.

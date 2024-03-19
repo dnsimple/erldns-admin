@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2019, DNSimple Corporation 
+%% Copyright (c) 2012-2019, DNSimple Corporation
 %%
 %% Permission to use, copy, modify, and/or distribute this software for any
 %% purpose with or without fee is hereby granted, provided that the above
@@ -25,58 +25,61 @@
 -include_lib("erldns/include/erldns.hrl").
 
 init(Req, State) ->
-  {cowboy_rest, Req, State}.
+    {cowboy_rest, Req, State}.
 
 allowed_methods(Req, State) ->
-  {[<<"GET">>, <<"DELETE">>], Req, State}.
+    {[<<"GET">>, <<"DELETE">>], Req, State}.
 
 content_types_provided(Req, State) ->
-  {[
-      {<<"text/html">>, to_html},
-      {<<"text/plain">>, to_text},
-      {<<"application/json">>, to_json}
-    ], Req, State}.
+    {
+        [
+            {<<"text/html">>, to_html},
+            {<<"text/plain">>, to_text},
+            {<<"application/json">>, to_json}
+        ],
+        Req,
+        State
+    }.
 
 is_authorized(Req, State) ->
-  erldns_admin:is_authorized(Req, State).
+    erldns_admin:is_authorized(Req, State).
 
 resource_exists(Req, State) ->
-  Name = cowboy_req:binding(zone_name, Req),
-  {erldns_zone_cache:in_zone(Name), Req, State}.
+    Name = cowboy_req:binding(zone_name, Req),
+    {erldns_zone_cache:in_zone(Name), Req, State}.
 
 delete_resource(Req, State) ->
-  Name = cowboy_req:binding(zone_name, Req),
-  lager:debug("Received DELETE for ~p", [Name]),
-  erldns_zone_cache:delete_zone(Name),
-  {true, Req, State}.
-
+    Name = cowboy_req:binding(zone_name, Req),
+    lager:debug("Received DELETE for ~p", [Name]),
+    erldns_zone_cache:delete_zone(Name),
+    {true, Req, State}.
 
 to_html(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_text(Req, State) ->
-  {<<"erldns admin">>, Req, State}.
+    {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-  Name = cowboy_req:binding(zone_name, Req),
-  Params = cowboy_req:parse_qs(Req),
-  lager:debug("Received GET for ~p (params: ~p)", [Name, Params]),
+    Name = cowboy_req:binding(zone_name, Req),
+    Params = cowboy_req:parse_qs(Req),
+    lager:debug("Received GET for ~p (params: ~p)", [Name, Params]),
 
-  case lists:keyfind(<<"metaonly">>, 1, Params) of
-    false ->
-      case erldns_zone_cache:get_zone(Name) of
-        {ok, Zone} ->
-          {erldns_zone_encoder:zone_to_json(Zone), Req, State};
-        {error, Reason} ->
-          lager:error("Error getting zone: ~p", [Reason]),
-          {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
-      end;
-    _ ->
-      case erldns_zone_cache:get_zone(Name) of
-        {ok, Zone} ->
-          {erldns_zone_encoder:zone_meta_to_json(Zone), Req, State};
-        {error, Reason} ->
-          lager:error("Error getting zone: ~p", [Reason]),
-          {halt, cowbow_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
-      end
-  end.
+    case lists:keyfind(<<"metaonly">>, 1, Params) of
+        false ->
+            case erldns_zone_cache:get_zone(Name) of
+                {ok, Zone} ->
+                    {erldns_zone_encoder:zone_to_json(Zone), Req, State};
+                {error, Reason} ->
+                    lager:error("Error getting zone: ~p", [Reason]),
+                    {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+            end;
+        _ ->
+            case erldns_zone_cache:get_zone(Name) of
+                {ok, Zone} ->
+                    {erldns_zone_encoder:zone_meta_to_json(Zone), Req, State};
+                {error, Reason} ->
+                    lager:error("Error getting zone: ~p", [Reason]),
+                    {halt, cowbow_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+            end
+    end.

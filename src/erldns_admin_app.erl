@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2019, DNSimple Corporation 
+%% Copyright (c) 2012-2019, DNSimple Corporation
 %%
 %% Permission to use, copy, modify, and/or distribute this software for any
 %% purpose with or without fee is hereby granted, provided that the above
@@ -20,9 +20,9 @@
 -export([start/2, stop/1]).
 
 start(_Type, _Args) ->
-  lager:debug("Starting erldns_admin application"),
-  erldns_admin_sup:start_link().
+    lager:debug("Starting erldns_admin application"),
+    erldns_admin_sup:start_link().
 
 stop(_State) ->
-  lager:info("Stop erldns_admin application"),
-  ok.
+    lager:info("Stop erldns_admin application"),
+    ok.

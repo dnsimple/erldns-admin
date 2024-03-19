@@ -26,79 +26,79 @@
 -define(DEFAULT_PORT, 8083).
 
 % Gen server hooks
--export([init/1,
+-export([
+    init/1,
     handle_call/3,
     handle_cast/2,
     handle_info/2,
     terminate/2,
     code_change/3
-  ]).
+]).
 
 -record(state, {}).
 
 %% Not part of gen server
 
 is_authorized(Req, State) ->
-  case credentials() of
-    {Username, Password} ->
-      case cowboy_req:parse_header(<<"authorization">>, Req) of
-        {basic, Username, Password} ->
-          {true, Req, Username};
+    case credentials() of
+        {Username, Password} ->
+            case cowboy_req:parse_header(<<"authorization">>, Req) of
+                {basic, Username, Password} ->
+                    {true, Req, Username};
+                _ ->
+                    {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
+            end;
         _ ->
-          {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
-      end;
-    _ -> {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
-  end.
+            {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
+    end.
 
 %% Gen server
 start_link() ->
-  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-  lager:debug("Starting ~p", [?MODULE]),
+    lager:debug("Starting ~p", [?MODULE]),
 
-  Dispatch = cowboy_router:compile(
-    [
-      {'_', 
+    Dispatch = cowboy_router:compile(
         [
-          {"/", erldns_admin_root_handler, []},
-          {"/zones/:zone_name", erldns_admin_zone_resource_handler, []},
-          {"/zones/:zone_name/records/", erldns_admin_zone_records_resource_handler, []},
-          {"/zones/:zone_name/records/:record_name", erldns_admin_zone_records_resource_handler, []},
-          {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, []}
+            {'_', [
+                {"/", erldns_admin_root_handler, []},
+                {"/zones/:zone_name", erldns_admin_zone_resource_handler, []},
+                {"/zones/:zone_name/records/", erldns_admin_zone_records_resource_handler, []},
+                {"/zones/:zone_name/records/:record_name", erldns_admin_zone_records_resource_handler, []},
+                {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, []}
+            ]}
         ]
-      }
-    ]
-  ),
+    ),
 
-  {ok, _} = cowboy:start_clear(?MODULE, [{port, port()}], #{env => #{dispatch => Dispatch}}),
+    {ok, _} = cowboy:start_clear(?MODULE, [{port, port()}], #{env => #{dispatch => Dispatch}}),
 
-  {ok, #state{}}.
+    {ok, #state{}}.
 
 handle_call(_Message, _From, State) ->
-  {reply, ok, State}.
+    {reply, ok, State}.
 handle_cast(_, State) ->
-  {noreply, State}.
+    {noreply, State}.
 handle_info(_, State) ->
-  {noreply, State}.
+    {noreply, State}.
 terminate(_, _) ->
-  ok.
+    ok.
 code_change(_PreviousVersion, State, _Extra) ->
-  {ok, State}.
+    {ok, State}.
 
 port() ->
-  proplists:get_value(port, env(), ?DEFAULT_PORT).
+    proplists:get_value(port, env(), ?DEFAULT_PORT).
 
 credentials() ->
-  case proplists:get_value(credentials, env()) of
-    {Username, Password} ->
-      {list_to_binary(Username), list_to_binary(Password)};
-    _ -> {}
-  end.
+    case proplists:get_value(credentials, env()) of
+        {Username, Password} ->
+            {list_to_binary(Username), list_to_binary(Password)};
+        _ ->
+            {}
+    end.
 
 env() ->
-  case application:get_env(erldns, admin) of
-    {ok, Env} -> Env;
-    _ -> []
-  end.
-
+    case application:get_env(erldns, admin) of
+        {ok, Env} -> Env;
+        _ -> []
+    end.

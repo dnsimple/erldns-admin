@@ -1,4 +1,4 @@
-%% Copyright (c) 2012-2019, DNSimple Corporation 
+%% Copyright (c) 2012-2019, DNSimple Corporation
 %%
 %% Permission to use, copy, modify, and/or distribute this software for any
 %% purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +30,12 @@
 %% Public API
 -spec start_link() -> any().
 start_link() ->
-  supervisor:start_link({local, ?SUPERVISOR}, ?MODULE, []).
-
+    supervisor:start_link({local, ?SUPERVISOR}, ?MODULE, []).
 
 %% Callbacks
 init(_Args) ->
-  SysProcs = [
-    ?CHILD(erldns_admin, worker, [])
-  ],
+    SysProcs = [
+        ?CHILD(erldns_admin, worker, [])
+    ],
 
-  {ok, {{one_for_one, 20, 10}, SysProcs}}.
+    {ok, {{one_for_one, 20, 10}, SysProcs}}.
