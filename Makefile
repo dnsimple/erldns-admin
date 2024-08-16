@@ -21,3 +21,7 @@ wipe: $(REBAR)
 
 .PHONY: fresh
 fresh: wipe build
+
+.PHONY: test
+test: $(REBAR)
+	$(REBAR) dialyzer

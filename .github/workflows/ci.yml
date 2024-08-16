@@ -13,10 +13,10 @@ concurrency:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        otp_version: ['26.2']
+        otp_version: ['27.0', '26.2', '25.3']
 
     steps:
       - uses: actions/checkout@v4
@@ -34,3 +34,30 @@ jobs:
           key: ${{ runner.os }}-erlang-${{ matrix.otp_version }}-${{ hashFiles('**/*rebar.lock') }}
 
       - run: make build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        otp_version: ['27.0', '26.2', '25.3']
+
+    needs:
+      - build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp_version }}
+          version-type: 'strict'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/rebar3
+            _build
+          key: ${{ runner.os }}-erlang-${{ matrix.otp_version }}-${{ hashFiles('**/*rebar.lock') }}
+
+      - run: make test
