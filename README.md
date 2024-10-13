@@ -15,3 +15,11 @@ To start fresh:
 ```bash
 make fresh
 ```
+
+## Running
+
+To start the HTTP server, run:
+
+```bash
+rebar3 shell
+```
