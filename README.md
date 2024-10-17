@@ -23,3 +23,11 @@ To start the HTTP server, run:
 ```bash
 rebar3 shell
 ```
+
+## Formatting
+
+If your editor doesn't automatically format Erlang code using [erlfmt](https://github.com/WhatsApp/erlfmt), run:
+
+```bash
+make format
+```
