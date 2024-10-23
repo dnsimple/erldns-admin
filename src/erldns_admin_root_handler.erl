@@ -45,13 +45,12 @@ to_text(Req, State) ->
     {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-    ZoneNamesAndVersions =
-        lists:map(
-            fun({Name, Version}) ->
-                #{<<"name">> => Name, <<"version">> => Version}
-            end,
-            erldns_zone_cache:zone_names_and_versions()
-        ),
+    ZoneNamesAndVersions = lists:map(
+        fun({Name, Version}) ->
+            #{<<"name">> => Name, <<"version">> => Version}
+        end,
+        erldns_zone_cache:zone_names_and_versions()
+    ),
 
     Body = json:encode(#{
         <<"erldns">> => #{
