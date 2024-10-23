@@ -45,19 +45,21 @@ to_text(Req, State) ->
     {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-    ZoneNamesAndVersionsForJson = lists:map(
-        fun({Name, Version}) ->
-            [{<<"name">>, Name}, {<<"version">>, Version}]
-        end,
-        erldns_zone_cache:zone_names_and_versions()
-    ),
+    ZoneNamesAndVersions =
+        lists:map(
+            fun({Name, Version}) ->
+                #{<<"name">> => Name, <<"version">> => Version}
+            end,
+            erldns_zone_cache:zone_names_and_versions()
+        ),
 
-    Body = jsx:encode([
-        {<<"erldns">>, [
-            {<<"zones">>, [
-                {<<"count">>, length(ZoneNamesAndVersionsForJson)},
-                {<<"versions">>, ZoneNamesAndVersionsForJson}
-            ]}
-        ]}
-    ]),
-    {Body, Req, State}.
+    Body = json:encode(#{
+        <<"erldns">> => #{
+            <<"zones">> => #{
+                <<"count">> => length(ZoneNamesAndVersions),
+                <<"versions">> => ZoneNamesAndVersions
+            }
+        }
+    }),
+
+    {iolist_to_binary(Body), Req, State}.
