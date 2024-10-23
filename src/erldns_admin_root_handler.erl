@@ -45,7 +45,7 @@ to_text(Req, State) ->
     {<<"erldns admin">>, Req, State}.
 
 to_json(Req, State) ->
-    ZoneNamesAndVersions = lists:map(
+    ZoneNamesAndVersionsForJson = lists:map(
         fun({Name, Version}) ->
             #{<<"name">> => Name, <<"version">> => Version}
         end,
@@ -55,8 +55,8 @@ to_json(Req, State) ->
     Body = json:encode(#{
         <<"erldns">> => #{
             <<"zones">> => #{
-                <<"count">> => length(ZoneNamesAndVersions),
-                <<"versions">> => ZoneNamesAndVersions
+                <<"count">> => length(ZoneNamesAndVersionsForJson),
+                <<"versions">> => ZoneNamesAndVersionsForJson
             }
         }
     }),
