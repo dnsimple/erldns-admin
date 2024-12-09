@@ -71,7 +71,7 @@ init([]) ->
         ]
     ),
 
-    {ok, _} = cowboy:start_clear(?MODULE, [{port, port()}], #{env => #{dispatch => Dispatch}}),
+    {ok, _} = cowboy:start_clear(?MODULE, [inet, inet6, {port, port()}], #{env => #{dispatch => Dispatch}}),
 
     {ok, #state{}}.
 
