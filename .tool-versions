@@ -1,1 +1,2 @@
-erlang 27.1.1
+# Also update ci.yml
+erlang 27.1.3
