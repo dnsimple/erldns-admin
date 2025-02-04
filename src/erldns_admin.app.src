@@ -1,6 +1,7 @@
 {application, erldns_admin, [
     {description, "Erlang Authoritative DNS Server Admin API"},
-    {vsn, "1.1.0"},
+    {vsn, "1.0.0"},
     {mod, {erldns_admin_app, []}},
-    {applications, [kernel, stdlib, inets, crypto, ssl, observer, bear, folsom, ranch, cowboy, erldns]}
+    {applications, [kernel, stdlib, inets, crypto, ssl, observer, bear, folsom, ranch, cowboy, erldns]},
+    {links, [{"GitHub", "https://github.com/dnsimple/erldns-admin"}]}
 ]}.
