@@ -2,17 +2,20 @@
 
 This app provides an admin API for querying and controlling an erldns server.
 
+[![Build Status](https://github.com/dnsimple/erldns-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/dnsimple/erldns-admin/actions/workflows/ci.yml)
+[![Module Version](https://img.shields.io/hexpm/v/erldns-admin.svg)](https://hex.pm/packages/erldns-admin)
+
 ## Building
 
 To build:
 
-```bash
+```shell
 make
 ```
 
 To start fresh:
 
-```bash
+```shell
 make fresh
 ```
 
@@ -20,7 +23,7 @@ make fresh
 
 To start the HTTP server, run:
 
-```bash
+```shell
 rebar3 shell
 ```
 
@@ -28,6 +31,6 @@ rebar3 shell
 
 If your editor doesn't automatically format Erlang code using [erlfmt](https://github.com/WhatsApp/erlfmt), run:
 
-```bash
+```shell
 make format
 ```
