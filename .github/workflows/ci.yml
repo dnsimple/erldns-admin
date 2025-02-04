@@ -64,6 +64,11 @@ jobs:
       matrix:
         otp_version: ['27.1']
 
+    needs:
+      - build
+      - markdownlint-cli
+      - yamllint
+
     steps:
       - uses: actions/checkout@v4
 
