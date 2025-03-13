@@ -14,7 +14,7 @@
 
 %% @doc Application supervisor.
 -module(erldns_admin_sup).
--behavior(supervisor).
+-behaviour(supervisor).
 
 % API
 -export([start_link/0]).

@@ -18,7 +18,7 @@
 
 -module(erldns_admin).
 
--behavior(gen_server).
+-behaviour(gen_server).
 
 -export([start_link/0]).
 -export([is_authorized/2]).
@@ -65,13 +65,16 @@ init([]) ->
                 {"/", erldns_admin_root_handler, []},
                 {"/zones/:zone_name", erldns_admin_zone_resource_handler, []},
                 {"/zones/:zone_name/records/", erldns_admin_zone_records_resource_handler, []},
-                {"/zones/:zone_name/records/:record_name", erldns_admin_zone_records_resource_handler, []},
+                {"/zones/:zone_name/records/:record_name",
+                    erldns_admin_zone_records_resource_handler, []},
                 {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, []}
             ]}
         ]
     ),
 
-    {ok, _} = cowboy:start_clear(?MODULE, [inet, inet6, {port, port()}], #{env => #{dispatch => Dispatch}}),
+    {ok, _} = cowboy:start_clear(?MODULE, [inet, inet6, {port, port()}], #{
+        env => #{dispatch => Dispatch}
+    }),
 
     {ok, #state{}}.
 

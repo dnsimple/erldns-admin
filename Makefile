@@ -19,6 +19,7 @@ fresh: wipe build
 .PHONY: test
 test:
 	rebar3 fmt --check
+	rebar3 lint
 
 .PHONY: format
 format:

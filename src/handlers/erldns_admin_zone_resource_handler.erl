@@ -16,7 +16,13 @@
 -module(erldns_admin_zone_resource_handler).
 
 -export([init/2]).
--export([content_types_provided/2, is_authorized/2, resource_exists/2, allowed_methods/2, delete_resource/2]).
+-export([
+    content_types_provided/2,
+    is_authorized/2,
+    resource_exists/2,
+    allowed_methods/2,
+    delete_resource/2
+]).
 -export([to_html/2, to_json/2, to_text/2]).
 
 -behaviour(cowboy_rest).
@@ -72,7 +78,11 @@ to_json(Req, State) ->
                     {erldns_zone_encoder:zone_to_json(Zone), Req, State};
                 {error, Reason} ->
                     lager:error("Error getting zone: ~p", [Reason]),
-                    {halt, cowboy_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+                    {halt,
+                        cowboy_req:reply(
+                            400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req
+                        ),
+                        State}
             end;
         _ ->
             case erldns_zone_cache:get_zone(Name) of
@@ -80,6 +90,10 @@ to_json(Req, State) ->
                     {erldns_zone_encoder:zone_meta_to_json(Zone), Req, State};
                 {error, Reason} ->
                     lager:error("Error getting zone: ~p", [Reason]),
-                    {halt, cowbow_req:reply(400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req), State}
+                    {halt,
+                        cowbow_req:reply(
+                            400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req
+                        ),
+                        State}
             end
     end.

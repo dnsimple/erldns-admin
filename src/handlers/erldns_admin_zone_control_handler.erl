@@ -23,9 +23,6 @@
 
 -behaviour(cowboy_rest).
 
--include_lib("dns_erlang/include/dns.hrl").
--include_lib("erldns/include/erldns.hrl").
-
 init(Req, State) ->
     {cowboy_rest, Req, State}.
 
@@ -52,8 +49,5 @@ to_text(Req, State) ->
 to_json(Req, State) ->
     Name = cowboy_req:binding(zone_name, Req),
     Action = cowboy_req:binding(action, Req),
-    case Action of
-        _ ->
-            lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
-            {json:encode(#{}), Req, State}
-    end.
+    lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
+    {json:encode(#{}), Req, State}.

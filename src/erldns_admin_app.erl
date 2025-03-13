@@ -14,7 +14,7 @@
 
 %% @doc The erldns OTP application.
 -module(erldns_admin_app).
--behavior(application).
+-behaviour(application).
 
 % Application hooks
 -export([start/2, stop/1]).

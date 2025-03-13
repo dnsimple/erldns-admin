@@ -61,9 +61,15 @@ to_json(Req, State) ->
 
     case lists:keyfind(<<"type">>, 1, Params) of
         false ->
-            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: unspecified)", [ZoneName, RecordName]),
+            lager:debug(
+                "Received GET (zone_name: ~p, record_name: ~p, record_type: unspecified)", [
+                    ZoneName, RecordName
+                ]
+            ),
             {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
         {<<"type">>, RecordType} ->
-            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: ~p)", [ZoneName, RecordName, RecordType]),
+            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: ~p)", [
+                ZoneName, RecordName, RecordType
+            ]),
             {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
     end.
