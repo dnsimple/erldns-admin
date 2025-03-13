@@ -18,6 +18,8 @@
 
 -module(erldns_admin).
 
+-include_lib("kernel/include/logger.hrl").
+
 -behaviour(gen_server).
 
 -export([start_link/0]).
@@ -57,7 +59,7 @@ start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    lager:debug("Starting ~p", [?MODULE]),
+    ?LOG_DEBUG(#{what => starting_cowboy_route}),
 
     Dispatch = cowboy_router:compile(
         [

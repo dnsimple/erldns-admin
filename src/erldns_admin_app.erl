@@ -16,13 +16,15 @@
 -module(erldns_admin_app).
 -behaviour(application).
 
+-include_lib("kernel/include/logger.hrl").
+
 % Application hooks
 -export([start/2, stop/1]).
 
 start(_Type, _Args) ->
-    lager:debug("Starting erldns_admin application"),
+    ?LOG_DEBUG(#{what => erldns_admin_application_start}),
     erldns_admin_sup:start_link().
 
 stop(_State) ->
-    lager:info("Stop erldns_admin application"),
+    ?LOG_DEBUG(#{what => erldns_admin_application_stop}),
     ok.

@@ -21,8 +21,7 @@
 
 -behaviour(cowboy_rest).
 
--include_lib("dns_erlang/include/dns.hrl").
--include_lib("erldns/include/erldns.hrl").
+-include_lib("kernel/include/logger.hrl").
 
 init(Req, State) ->
     {cowboy_rest, Req, State}.
@@ -58,18 +57,16 @@ to_json(Req, State) ->
     ZoneName = cowboy_req:binding(zone_name, Req),
     RecordName = cowboy_req:binding(record_name, Req, <<"">>),
     Params = cowboy_req:parse_qs(Req),
-
     case lists:keyfind(<<"type">>, 1, Params) of
         false ->
-            lager:debug(
-                "Received GET (zone_name: ~p, record_name: ~p, record_type: unspecified)", [
-                    ZoneName, RecordName
-                ]
-            ),
+            ?LOG_DEBUG(#{what => get_zone_resource_call, zone => ZoneName, record => RecordName}),
             {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName), Req, State};
         {<<"type">>, RecordType} ->
-            lager:debug("Received GET (zone_name: ~p, record_name: ~p, record_type: ~p)", [
-                ZoneName, RecordName, RecordType
-            ]),
+            ?LOG_DEBUG(#{
+                what => get_zone_resource_call,
+                zone => ZoneName,
+                record => RecordName,
+                type => RecordType
+            }),
             {erldns_zone_encoder:zone_records_to_json(ZoneName, RecordName, RecordType), Req, State}
     end.

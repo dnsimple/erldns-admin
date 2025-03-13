@@ -17,6 +17,8 @@
 %% Currently no actions are supported.
 -module(erldns_admin_zone_control_handler).
 
+-include_lib("kernel/include/logger.hrl").
+
 -export([init/2]).
 -export([content_types_provided/2, is_authorized/2]).
 -export([to_html/2, to_json/2, to_text/2]).
@@ -49,5 +51,5 @@ to_text(Req, State) ->
 to_json(Req, State) ->
     Name = cowboy_req:binding(zone_name, Req),
     Action = cowboy_req:binding(action, Req),
-    lager:debug("Unsupported action: ~p (name: ~p)", [Action, Name]),
+    ?LOG_DEBUG(#{what => get_zone_control_call, zone => Name, action => Action}),
     {json:encode(#{}), Req, State}.

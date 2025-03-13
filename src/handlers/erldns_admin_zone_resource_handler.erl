@@ -27,8 +27,7 @@
 
 -behaviour(cowboy_rest).
 
--include_lib("dns_erlang/include/dns.hrl").
--include_lib("erldns/include/erldns.hrl").
+-include_lib("kernel/include/logger.hrl").
 
 init(Req, State) ->
     {cowboy_rest, Req, State}.
@@ -56,7 +55,7 @@ resource_exists(Req, State) ->
 
 delete_resource(Req, State) ->
     Name = cowboy_req:binding(zone_name, Req),
-    lager:debug("Received DELETE for ~p", [Name]),
+    ?LOG_DEBUG(#{what => received_delete_resource, resource => Name}),
     erldns_zone_cache:delete_zone(Name),
     {true, Req, State}.
 
@@ -69,7 +68,7 @@ to_text(Req, State) ->
 to_json(Req, State) ->
     Name = cowboy_req:binding(zone_name, Req),
     Params = cowboy_req:parse_qs(Req),
-    lager:debug("Received GET for ~p (params: ~p)", [Name, Params]),
+    ?LOG_DEBUG(#{what => received_get, resource => Name, params => Params}),
 
     case lists:keyfind(<<"metaonly">>, 1, Params) of
         false ->
@@ -77,7 +76,7 @@ to_json(Req, State) ->
                 {ok, Zone} ->
                     {erldns_zone_encoder:zone_to_json(Zone), Req, State};
                 {error, Reason} ->
-                    lager:error("Error getting zone: ~p", [Reason]),
+                    ?LOG_ERROR(#{what => get_zone_error, error => Reason}),
                     {halt,
                         cowboy_req:reply(
                             400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req
@@ -89,7 +88,7 @@ to_json(Req, State) ->
                 {ok, Zone} ->
                     {erldns_zone_encoder:zone_meta_to_json(Zone), Req, State};
                 {error, Reason} ->
-                    lager:error("Error getting zone: ~p", [Reason]),
+                    ?LOG_ERROR(#{what => get_zone_error, error => Reason}),
                     {halt,
                         cowbow_req:reply(
                             400, [], io_lib:format("Error getting zone: ~p", [Reason]), Req
