@@ -17,35 +17,56 @@
 %% Provides zone quering and command-and-control functionality.
 
 -module(erldns_admin).
+-moduledoc """
+Erldns admin API.
+
+### Configuration:
+This application will read from your `sys.config` the following example:
+```erlang
+{erldns_admin, [
+    {credentials, {<<"username">>, <<"password">>}},
+    {port, 8083}
+]}
+```
+where `credentials` is a tuple of `username` and `password` as either strings or binaries,
+and `port` is a valid Unix port to listen on.
+""".
 
 -export([is_authorized/2]).
 
--define(DEFAULT_PORT, 8083).
+-doc """
+Configuration parameters, see the module documentation for details.
+""".
+-type config() :: #{
+    port := 0..65535,
+    username := binary(),
+    password := binary()
+}.
 
-% Gen server hooks
--export([
-    init/1,
-    handle_call/3,
-    handle_cast/2,
-    handle_info/2,
-    terminate/2,
-    code_change/3
-]).
+-doc "Common state for all handlers".
+-opaque handler_state() :: #{
+    username := binary(),
+    password := binary()
+}.
+-export_type([config/0, handler_state/0]).
 
--record(state, {}).
-
-%% Not part of gen server
-
-is_authorized(Req, State) ->
-    case credentials() of
-        {Username, Password} ->
-            case cowboy_req:parse_header(<<"authorization">>, Req) of
-                {basic, Username, Password} ->
-                    {true, Req, Username};
-                _ ->
-                    {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
-            end;
+-doc false.
+-spec is_authorized(cowboy_req:req(), handler_state()) ->
+    {true | {false, iodata()}, cowboy_req:req(), handler_state()}
+    | {stop, cowboy_req:req(), handler_state()}.
+is_authorized(Req, #{username := ValidUsername, password := ValidPassword} = State) ->
+    maybe
+        {basic, GivenUsername, GivenPassword} ?= cowboy_req:parse_header(<<"authorization">>, Req),
+        true ?= is_binary_of_equal_size(GivenUsername),
+        true ?= is_binary_of_equal_size(GivenPassword),
+        true ?= crypto:hash_equals(GivenUsername, ValidUsername) andalso
+            crypto:hash_equals(GivenPassword, ValidPassword),
+        {true, Req, State}
+    else
         _ ->
             {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
     end.
 
+-spec is_binary_of_equal_size(term()) -> boolean().
+is_binary_of_equal_size(Bin) ->
+    is_binary(Bin) andalso byte_size(Bin) =:= byte_size(Bin).
