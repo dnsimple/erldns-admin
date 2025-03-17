@@ -16,26 +16,26 @@ permissions: write-all
 jobs:
   check-deps:
     name: Check Dependencies
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        otp_version: ['27.1.3']
+        otp: ['27']
+        rebar3: ['3.24']
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: ${{ matrix.otp_version }}
-          rebar3-version: '3.22.1'
-          version-type: 'strict'
+          otp-version: ${{matrix.otp}}
+          rebar3-version: ${{matrix.rebar3}}
 
       - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/rebar3
             _build
-          key: ${{ runner.os }}-erlang-${{ matrix.otp_version }}-${{ hashFiles('**/*rebar.lock') }}
+          key: ${{ runner.os }}-erlang-${{ matrix.otp }}-rebar3-${{ matrix.rebar3 }}-hash-${{hashFiles('rebar.lock')}}
 
       - name: Build
         run: make build
