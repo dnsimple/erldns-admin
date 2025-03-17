@@ -12,30 +12,37 @@
 %% ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 %% OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-%% @doc Application supervisor.
 -module(erldns_admin_sup).
+-moduledoc false.
+
 -behaviour(supervisor).
 
-% API
--export([start_link/0]).
+-export([start_link/1]).
 
-% Supervisor hooks
 -export([init/1]).
 
--define(SUPERVISOR, ?MODULE).
+-spec start_link(erldns_admin:config()) -> supervisor:startlink_ret().
+start_link(Config) ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, Config).
 
-%% Helper macro for declaring children of supervisor
--define(CHILD(I, Type, Args), {I, {I, start_link, Args}, permanent, 5000, Type, [I]}).
+-spec init(erldns_admin:config()) -> {ok, {supervisor:sup_flags(), [supervisor:child_spec()]}}.
+init(#{port := Port, username := Username, password := Password}) ->
+    State = #{username => Username, password => Password},
+    Dispatch = cowboy_router:compile(
+        [
+            {'_', [
+                {"/", erldns_admin_root_handler, State},
+                {"/zones/:zone_name", erldns_admin_zone_resource_handler, State},
+                {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, State},
+                {"/zones/:zone_name/records[/:record_name]",
+                    erldns_admin_zone_records_resource_handler, State}
+            ]}
+        ]
+    ),
 
-%% Public API
--spec start_link() -> any().
-start_link() ->
-    supervisor:start_link({local, ?SUPERVISOR}, ?MODULE, []).
+    TransportOpts = #{socket_opts => [inet, inet6, {ip, {0, 0, 0, 0}}, {port, Port}]},
+    ProtocolOpts = #{env => #{dispatch => Dispatch}},
+    {ok, _} = cowboy:start_clear(?MODULE, TransportOpts, ProtocolOpts),
 
-%% Callbacks
-init(_Args) ->
-    SysProcs = [
-        ?CHILD(erldns_admin, worker, [])
-    ],
-
-    {ok, {{one_for_one, 20, 10}, SysProcs}}.
+    Strategy = #{strategy => one_for_one, intensity => 20, period => 10},
+    {ok, {Strategy, []}}.

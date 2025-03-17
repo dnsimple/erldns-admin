@@ -18,11 +18,6 @@
 
 -module(erldns_admin).
 
--include_lib("kernel/include/logger.hrl").
-
--behaviour(gen_server).
-
--export([start_link/0]).
 -export([is_authorized/2]).
 
 -define(DEFAULT_PORT, 8083).
@@ -54,56 +49,3 @@ is_authorized(Req, State) ->
             {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
     end.
 
-%% Gen server
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
-init([]) ->
-    ?LOG_DEBUG(#{what => starting_cowboy_route}),
-
-    Dispatch = cowboy_router:compile(
-        [
-            {'_', [
-                {"/", erldns_admin_root_handler, []},
-                {"/zones/:zone_name", erldns_admin_zone_resource_handler, []},
-                {"/zones/:zone_name/records/", erldns_admin_zone_records_resource_handler, []},
-                {"/zones/:zone_name/records/:record_name",
-                    erldns_admin_zone_records_resource_handler, []},
-                {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, []}
-            ]}
-        ]
-    ),
-
-    {ok, _} = cowboy:start_clear(?MODULE, [inet, inet6, {port, port()}], #{
-        env => #{dispatch => Dispatch}
-    }),
-
-    {ok, #state{}}.
-
-handle_call(_Message, _From, State) ->
-    {reply, ok, State}.
-handle_cast(_, State) ->
-    {noreply, State}.
-handle_info(_, State) ->
-    {noreply, State}.
-terminate(_, _) ->
-    ok.
-code_change(_PreviousVersion, State, _Extra) ->
-    {ok, State}.
-
-port() ->
-    proplists:get_value(port, env(), ?DEFAULT_PORT).
-
-credentials() ->
-    case proplists:get_value(credentials, env()) of
-        {Username, Password} ->
-            {list_to_binary(Username), list_to_binary(Password)};
-        _ ->
-            {}
-    end.
-
-env() ->
-    case application:get_env(erldns, admin) of
-        {ok, Env} -> Env;
-        _ -> []
-    end.
