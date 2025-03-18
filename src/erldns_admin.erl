@@ -17,88 +17,56 @@
 %% Provides zone quering and command-and-control functionality.
 
 -module(erldns_admin).
+-moduledoc """
+Erldns admin API.
 
--behavior(gen_server).
+### Configuration:
+This application will read from your `sys.config` the following example:
+```erlang
+{erldns_admin, [
+    {credentials, {<<"username">>, <<"password">>}},
+    {port, 8083}
+]}
+```
+where `credentials` is a tuple of `username` and `password` as either strings or binaries,
+and `port` is a valid Unix port to listen on.
+""".
 
--export([start_link/0]).
 -export([is_authorized/2]).
 
--define(DEFAULT_PORT, 8083).
+-doc """
+Configuration parameters, see the module documentation for details.
+""".
+-type config() :: #{
+    port := 0..65535,
+    username := binary(),
+    password := binary()
+}.
 
-% Gen server hooks
--export([
-    init/1,
-    handle_call/3,
-    handle_cast/2,
-    handle_info/2,
-    terminate/2,
-    code_change/3
-]).
+-doc "Common state for all handlers".
+-opaque handler_state() :: #{
+    username := binary(),
+    password := binary()
+}.
+-export_type([config/0, handler_state/0]).
 
--record(state, {}).
-
-%% Not part of gen server
-
-is_authorized(Req, State) ->
-    case credentials() of
-        {Username, Password} ->
-            case cowboy_req:parse_header(<<"authorization">>, Req) of
-                {basic, Username, Password} ->
-                    {true, Req, Username};
-                _ ->
-                    {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
-            end;
+-doc false.
+-spec is_authorized(cowboy_req:req(), handler_state()) ->
+    {true | {false, iodata()}, cowboy_req:req(), handler_state()}
+    | {stop, cowboy_req:req(), handler_state()}.
+is_authorized(Req, #{username := ValidUsername, password := ValidPassword} = State) ->
+    maybe
+        {basic, GivenUsername, GivenPassword} ?= cowboy_req:parse_header(<<"authorization">>, Req),
+        true ?= is_binary_of_equal_size(GivenUsername),
+        true ?= is_binary_of_equal_size(GivenPassword),
+        true ?= crypto:hash_equals(GivenUsername, ValidUsername) andalso
+            crypto:hash_equals(GivenPassword, ValidPassword),
+        {true, Req, State}
+    else
         _ ->
             {{false, <<"Basic realm=\"erldns admin\"">>}, Req, State}
     end.
 
-%% Gen server
-start_link() ->
-    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
-init([]) ->
-    lager:debug("Starting ~p", [?MODULE]),
-
-    Dispatch = cowboy_router:compile(
-        [
-            {'_', [
-                {"/", erldns_admin_root_handler, []},
-                {"/zones/:zone_name", erldns_admin_zone_resource_handler, []},
-                {"/zones/:zone_name/records/", erldns_admin_zone_records_resource_handler, []},
-                {"/zones/:zone_name/records/:record_name", erldns_admin_zone_records_resource_handler, []},
-                {"/zones/:zone_name/:action", erldns_admin_zone_control_handler, []}
-            ]}
-        ]
-    ),
-
-    {ok, _} = cowboy:start_clear(?MODULE, [inet, inet6, {port, port()}], #{env => #{dispatch => Dispatch}}),
-
-    {ok, #state{}}.
-
-handle_call(_Message, _From, State) ->
-    {reply, ok, State}.
-handle_cast(_, State) ->
-    {noreply, State}.
-handle_info(_, State) ->
-    {noreply, State}.
-terminate(_, _) ->
-    ok.
-code_change(_PreviousVersion, State, _Extra) ->
-    {ok, State}.
-
-port() ->
-    proplists:get_value(port, env(), ?DEFAULT_PORT).
-
-credentials() ->
-    case proplists:get_value(credentials, env()) of
-        {Username, Password} ->
-            {list_to_binary(Username), list_to_binary(Password)};
-        _ ->
-            {}
-    end.
-
-env() ->
-    case application:get_env(erldns, admin) of
-        {ok, Env} -> Env;
-        _ -> []
-    end.
+-spec is_binary_of_equal_size(term()) -> boolean().
+is_binary_of_equal_size(Bin) ->
+    is_binary(Bin) andalso byte_size(Bin) =:= byte_size(Bin).
