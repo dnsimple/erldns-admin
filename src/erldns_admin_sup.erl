@@ -40,7 +40,7 @@ init(#{port := Port, username := Username, password := Password}) ->
         ]
     ),
 
-    TransportOpts = #{socket_opts => [inet, inet6, {ip, {0, 0, 0, 0}}, {port, Port}]},
+    TransportOpts = #{socket_opts => [inet, {ip, {0, 0, 0, 0}}, {port, Port}]},
     ProtocolOpts = #{env => #{dispatch => Dispatch}},
     {ok, _} = cowboy:start_clear(?MODULE, TransportOpts, ProtocolOpts),
 
